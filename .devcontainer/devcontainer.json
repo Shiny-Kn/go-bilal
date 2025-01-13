@@ -1,0 +1,24 @@
+{
+    "name": "Alpine",
+    "image": "mcr.microsoft.com/devcontainers/base:alpine-3.20",
+    "features": {
+        "ghcr.io/devcontainers/features/go:1": {}
+    },
+    "forwardPorts": [],
+    "postCreateCommand": "uname -a",
+    
+    "mounts": [
+        "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached"
+    ],
+
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "golang.go"
+            ]
+        }
+    },
+
+    "remoteUser": "vscode"
+}
+
