@@ -2,7 +2,7 @@
     "name": "Alpine",
     "image": "mcr.microsoft.com/devcontainers/base:alpine-3.20",
     "features": {
-        "ghcr.io/devcontainers/features/go:1": {}
+        "ghcr.io/devcontainers/features/go:5": {}
     },
     "forwardPorts": [],
     "postCreateCommand": "uname -a",
