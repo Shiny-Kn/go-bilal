@@ -1,0 +1,14 @@
+version: '3'
+services:
+  cowsay-go:
+    image: bilalis/cowsay-go:latest
+    restart: unless-stopped
+
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 86400 --cleanup
+    environment:
+       - WATCHTOWER_NOTIFICATIONS=shoutrrr
+       - WATCHTOWER_NOTIFICATION_URL=smtp://ismobilal47@gmail.com:votremotdepasse@smtp.gmail.com:587/?fromAddress=ismobilal47@gmail.com&toAddresses=ismobilal47@gmail.com
