@@ -1,21 +1,14 @@
-# Use the official Golang image as a base
-FROM golang:1.20 as builder
+FROM ubuntu:24.04
 
-# Set the Current Working Directory inside the container
+# Copier le fichier cowsay dans le conteneur
+COPY bin/cowsay /usr/local/bin/cowsay
+
+# Rendre le fichier exécutable
+RUN chmod +x /usr/local/bin/cowsay
+
+# Définir le répertoire de travail
 WORKDIR /app
 
-# Copy everything from the current directory to the working directory
-COPY . .
-
-# Build the Go app
-RUN go build -o myapp .
-
-# Start a new stage from scratch
-FROM alpine:latest  
-
-# Copy the Pre-built binary file from the previous stage
-COPY --from=builder /app/myapp .
-
-# Command to run the executable
-CMD ["./myapp"]
+# Commande par défaut
+CMD ["cowsay"]
 

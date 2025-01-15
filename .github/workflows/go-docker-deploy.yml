@@ -1,44 +1,91 @@
-name: try docker push image
-
-on:
-  workflow_dispatch:
-  push:
-    branches:
-      - 'main'
-    tags:
-      - 'v*'
-
-env:
-  REGISTRY: docker.io
-  IMAGE_NAME: bilalis/myvache
-
-jobs:
-  build:
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-
+---
+  name: Build GO & Docker push
+      
+  on:
+    workflow_dispatch:
+    push:
+      tags: 'v*'
+  
+  env:
+    REGISTRY: docker.io
+    IMAGE_NAME: kareemdev2/cowsaygo
+  
+  jobs:
+    # Build job
+    build:
+      runs-on: ubuntu-latest
+  
+      steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            Dockerfile
+            main.go
+            go.sum
+  
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+  
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: all
+  
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+  
+      - name: Build the cowsay
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.4'
+          check-latest: true
+      - run: go build -o bin/cowsay main.go
+  
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-          
-      
+          username: ${{ vars.DOCKERHUB_USERNAME_Karim }}
+          password: ${{ secrets.DOCKERHUB_TOKEN_Karim }}
+  
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+  
+      - name: Save binary as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: cowsay-binary
+          path: bin/cowsay
+  
+  # Deploy job
+    deploy:
+      runs-on: self-hosted  # Utiliser un runner auto-hébergé
+  
+      needs: build  # Le déploiement dépend du succès de l'étape build
+  
+      steps:
+      - name: Download binary artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: cowsay-binary
+          path: ./bin
+  
+      - name: Deploy application on server
+        run: |
+            docker stop cowsay || true
+            docker rm cowsay || true
+            chmod +x ./bin/cowsay
+            nohup ./bin/cowsay &
 
 
 
